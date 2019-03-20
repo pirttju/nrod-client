@@ -86,8 +86,10 @@ exports.processMessage = function(body, callback) {
                 // remove old value if exists (possible duplicate message and postgres will not be happy)
                 const length = td_heartbeats.length
                 for (let i = 0; i < length; i++) {
-                    if (td_heartbeats[i].area_id && td_heartbeats[i].area_id === d.CT_MSG.area_id) {
-                        td_heartbeats.splice(i, 1);
+                    if (td_heartbeats[i].area_id !== undefined) {
+                        if (td_heartbeats[i].area_id === d.CT_MSG.area_id) {
+                            td_heartbeats.splice(i, 1);
+                        }
                     }
                 }
                 // push new value
