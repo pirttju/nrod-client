@@ -22,8 +22,8 @@ manager.connect(function(error, client, reconnect) {
     const dt = new Date();
     if (error) {
         console.error(dt.toISOString(), "STOMP: Failed to connect:", error.message);
-        console.error("Terminal error. Exiting in 60 sec...")
-        setTimeout(exitProgram, 60000);
+        console.error("Terminal error. Exiting in 60 sec...");
+        return setTimeout(exitProgram, 60000);
     } else {
         console.error(dt.toISOString(), "STOMP: Connected");
     }
