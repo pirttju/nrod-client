@@ -1,7 +1,7 @@
 const dotenv = require('dotenv').config();
 const stompit = require('stompit');
 const Listener = require('./listener');
-const td = require('./models/td');
+const TdFeed = require('./models/tdfeed');
 
 // Configure connection management
 const servers = [{
@@ -49,40 +49,25 @@ connections.connect((error, client, reconnect) => {
   // Movement Data
   const mvtListener = new Listener(client, 'TRAIN_MVT_ALL_TOC');
   mvtListener.subscribe((data) => {
-    //console.log(data);
+    // TODO: handle data
   });
 
   // Train Describer Data
+  const td = new TdFeed();
   const tdListener = new Listener(client, 'TD_ALL_SIG_AREA');
   tdListener.subscribe((data) => {
-    if (!Array.isArray(data) || data.length === 0) return;
-
-    const cData = [];
-
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].CA_MSG) {
-        cData.push(td.parseTdCMessage(data[i].CA_MSG));
-      }
-      else if (data[i].CB_MSG) {
-        cData.push(td.parseTdCMessage(data[i].CB_MSG));
-      }
-      else if (data[i].CC_MSG) {
-        cData.push(td.parseTdCMessage(data[i].CC_MSG));
-      }
-    }
-
-    td.insertTdC(cData);
+    td.parse(data);
   });
 
   // Very Short Term Plan Schedules
   const vstpListener = new Listener(client, 'VSTP_ALL');
   vstpListener.subscribe((data) => {
-
+    // TODO: handle data
   });
 
   // Temporary Speed Restrictions
   const tsrListener = new Listener(client, 'TSR_ALL_ROUTE');
   tsrListener.subscribe((data) => {
-
+    // TODO: handle data
   });
 });

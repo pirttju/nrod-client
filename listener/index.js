@@ -1,33 +1,10 @@
 const dotenv = require('dotenv').config();
-const io = require('@pm2/io');
 
 // Calculates message latency
-function calculateLatency(ts) {
-  const now = new Date();
-  const dt = new Date(parseInt(ts));
-  const d = (now-dt);
-
-  return d;
-}
-
 class Listener {
   constructor(client, topic) {
     this.client = client;
     this.topic = topic;
-
-    // Latency meter
-    this.histogram = io.histogram({
-      name: `${this.topic} Latency`,
-      measurement: 'mean'
-    });
-
-    // Message rate meter
-    this.meter = io.meter({
-      name: `${this.topic} msg/min`,
-      type: 'meter',
-      samples: 60,
-      timeframe: 60
-    });
   }
 
   subscribe(messageHandler) {
@@ -43,15 +20,11 @@ class Listener {
         return;
       }
 
-      // Update metrics
-      const latency = calculateLatency(message.headers.timestamp);
-      this.histogram.update(latency);
-      this.meter.mark();
-
       message.readString('utf8', (error, string) => {
         if (error) {
           console.log(`[${this.topic}] Read message error: ${error.message}`);
-          this.client.nack(message); // NACK
+          // Send NACK
+          this.client.nack(message);
           return;
         }
 
@@ -61,11 +34,13 @@ class Listener {
           data = JSON.parse(string);
         } catch(error) {
           console.log(`[${this.topic}] JSON parse error: ${error}`);
-          this.client.nack(message); // NACK
+          // Send NACK
+          this.client.nack(message);
           return;
         }
 
-        this.client.ack(message); // ACK
+        // Send ACK
+        this.client.ack(message);
 
         messageHandler(data);
       });
