@@ -1,145 +1,88 @@
-const config = require("./config");
-const tdfeed = require("./consumers/tdfeed");
-const vstpfeed = require("./consumers/vstpfeed");
-const mvtfeed = require("./consumers/mvtfeed");
-const tsrfeed = require("./consumers/tsrfeed");
-const stompit = require("stompit");
+const dotenv = require('dotenv').config();
+const stompit = require('stompit');
+const Listener = require('./listener');
+const td = require('./models/td');
 
-// Server
-const servers = [config.nrod.connectOptions];
+// Configure connection management
+const servers = [{
+  'host': process.env.NROD_HOST,
+  'port': process.env.NROD_PORT,
+  'connectHeaders': {
+    'host': process.env.NROD_HOST,
+    'heart-beat': '15000,15000',
+    'client-id': `${process.env.NROD_USER}-${process.env.NROD_CLIENT_ID}`,
+    'login': process.env.NROD_USER,
+    'passcode': process.env.NROD_PASSWORD
+  }
+}];
 
 const reconnectOptions = {
-    "useExponentialBackOff": true,
-    "maxReconnects": 30,
-    "randomize": false
+  'useExponentialBackOff': true,
+  'initialReconnectDelay': 1000,
+  'maxReconnectDelay': 60000,
+  'maxReconnects': 30,
+  'randomize': false
 };
 
-// Create fail managed connection
-const manager = new stompit.ConnectFailover(servers, reconnectOptions);
+const connections = new stompit.ConnectFailover(servers, reconnectOptions);
 
-// Open connection
-manager.connect(function(error, client, reconnect) {
-    const dt = new Date();
-    if (error) {
-        console.error(dt.toISOString(), "STOMP: Failed to connect:", error.message);
-        console.error("Terminal error. Exiting in 60 sec...");
-        return setTimeout(exitProgram, 60000);
-    } else {
-        console.error(dt.toISOString(), "STOMP: Connected");
-    }
+// Log connection events
+connections.on('connecting', (connector) => {
+  const address = connector.serverProperties.remoteAddress.transportPath;
 
-    // Reconnect on error
-    client.on("error", function(error) {
-        const dt = new Date();
-        console.error(dt.toISOString(), "STOMP: Disconnected. Start reconnecting in 30 sec...");
-        setTimeout(reconnect, 30000);
-    });
-
-    // Subscribe to the TD Feed
-    client.subscribe({
-            "destination": "/topic/TD_ALL_SIG_AREA",
-            "activemq.subscriptionName": "railty_td_all_sig_area",
-            "ack": "client-individual"
-        },
-        function(error, message) {
-            if (error) {
-                console.error("TD_ALL_SIG_AREA: Subscribe error:", error.message);
-                return;
-            }
-            message.readString("utf-8", function(error, body) {
-                client.ack(message); 
-                if (error) {
-                    const dt = new Date();
-                    console.error(dt.toISOString(), "TD_ALL_SIG_AREA: readString() failed:", error.message);
-                    return;
-                }
-                // Send message to consumer
-                tdfeed.processMessage(body, function() {
-                    // done
-                });
-            });
-        }
-    );
-
-    // Subscribe to the VSTP Feed
-    client.subscribe({
-            "destination": "/topic/VSTP_ALL",
-            "activemq.subscriptionName": "railty_vstp_all",
-            "ack": "client-individual"
-        },
-        function(error, message) {
-            if (error) {
-                console.error("VSTP_ALL: Subscribe error:", error.message);
-                return;
-            }
-            message.readString("utf-8", function(error, body) {
-                client.ack(message); 
-                if (error) {
-                    const dt = new Date();
-                    console.error(dt.toISOString(), "VSTP_ALL: readString() failed:", error.message);
-                    return;
-                }
-                // Send message to consumer
-                vstpfeed.processMessage(body, function() {
-                    // done
-                });
-            });
-        }
-    );
-
-    // Subscribe to the Train Movements Feed
-    client.subscribe({
-            "destination": "/topic/TRAIN_MVT_ALL_TOC",
-            "activemq.subscriptionName": "railty_train_mvt_all_toc",
-            "ack": "client-individual"
-        },
-        function(error, message) {
-            if (error) {
-                console.error("TRAIN_MVT_ALL_TOC: Subscribe error:", error.message);
-                return;
-            }
-            message.readString("utf-8", function(error, body) {
-                client.ack(message);
-                if (error) {
-                    const dt = new Date();
-                    console.error(dt.toISOString(), "TRAIN_MVT_ALL_TOC: readString() failed:", error.message);
-                    return;
-                }
-                // Send message to consumer
-                mvtfeed.processMessage(body, function() {
-                    // done
-                });
-            });
-        }
-    );
-
-    // Subscribe to the TSR Feed
-    client.subscribe({
-            "destination": "/topic/TSR_ALL_ROUTE",
-            "activemq.subscriptionName": "railty_tsr_all_route",
-            "ack": "client-individual"
-        },
-        function(error, message) {
-            if (error) {
-                console.error("TSR_ALL_ROUTE: Subscribe error:", error.message);
-                return;
-            }
-            message.readString("utf-8", function(error, body) {
-                client.ack(message);
-                if (error) {
-                    const dt = new Date();
-                    console.error(dt.toISOString(), "TSR_ALL_ROUTE: readString() failed:", error.message);
-                    return;
-                }
-                // Send message to consumer
-                tsrfeed.processMessage(body, function() {
-                    // done
-                });
-            });
-        }
-    );
+  console.log(`Connecting to ${address}`);
 });
 
-const exitProgram = function() {
-    process.exit();
-}
+connections.on('error', (error) => {
+  const connectArgs = error.connectArgs;
+  const address = `${connectArgs.host}:${connectArgs.port}`;
+
+  console.log(`Connection error to ${address}: ${error.message}`);
+});
+
+// Connect, subscribe to queues
+connections.connect((error, client, reconnect) => {
+  if (error) {
+    console.log('Terminal error, gave up reconnecting');
+  }
+
+  // Movement Data
+  const mvtListener = new Listener(client, 'TRAIN_MVT_ALL_TOC');
+  mvtListener.subscribe((data) => {
+    //console.log(data);
+  });
+
+  // Train Describer Data
+  const tdListener = new Listener(client, 'TD_ALL_SIG_AREA');
+  tdListener.subscribe((data) => {
+    if (!Array.isArray(data) || data.length === 0) return;
+
+    const cData = [];
+
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].CA_MSG) {
+        cData.push(td.parseTdCMessage(data[i].CA_MSG));
+      }
+      else if (data[i].CB_MSG) {
+        cData.push(td.parseTdCMessage(data[i].CB_MSG));
+      }
+      else if (data[i].CC_MSG) {
+        cData.push(td.parseTdCMessage(data[i].CC_MSG));
+      }
+    }
+
+    td.insertTdC(cData);
+  });
+
+  // Very Short Term Plan Schedules
+  const vstpListener = new Listener(client, 'VSTP_ALL');
+  vstpListener.subscribe((data) => {
+
+  });
+
+  // Temporary Speed Restrictions
+  const tsrListener = new Listener(client, 'TSR_ALL_ROUTE');
+  tsrListener.subscribe((data) => {
+
+  });
+});

@@ -1,0 +1,9 @@
+# anything temporary
+temp/
+
+# dependencies
+node_modules/
+
+# misc
+.env
+npm-debug.log*
