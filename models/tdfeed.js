@@ -35,13 +35,34 @@ function calculateLatency(dt) {
 
 class TdFeed {
   constructor() {
-    this.sig = {}; // S Class signalling elements
+    this.bits = {}; // S Class bits
 
     // Latency meter
     this.latency = io.histogram({
       name: 'TD Feed Latency',
       measurement: 'mean'
     });
+  }
+
+  setBit(areaId, bit, data) {
+    if (this.bits.hasOwnProperty(`${areaId}:${bit}`)) {
+      if (this.bits[`${areaId}:${bit}`] !== data) {
+        this.bits[`${areaId}:${bit}`] = data;
+        return true; // modified
+      }
+    } else {
+      this.bits[`${areaId}:${bit}`] = data;
+      return null; // did not exist
+    }
+    return false // not modified
+  }
+
+  getBit(areaId, bit) {
+    if (this.bits.hasOwnProperty(`${areaId}:${bit}`)) {
+      return this.bits[`${areaId}:${bit}`];
+    } else {
+      return null; // does not exist
+    }
   }
 
   parseCClassMessage(data) {
@@ -71,6 +92,26 @@ class TdFeed {
     // Update metrics
     const latency = calculateLatency(datetime);
     this.latency.update(latency);
+
+    // Parse bits
+    const out = [];
+    const values = parseInt(data.data, 16);
+    const addr = parseInt(data.address, 16);
+    let bit = 0;
+
+    for (let b = 0; b < 8; b++) {
+      bit = addr * 8 + b;
+      if (this.setBit(data.area_id, bit, ((values & (1 << b)) > 0))) {
+        out.push({
+          time: datetime,
+          area_id: data.area_id,
+          bit: bit,
+          state: ((values & (1 << b)) > 0)
+        });
+      }
+    }
+
+    return out;
   }
 
   parseSClassRefresh(data) {
@@ -86,6 +127,7 @@ class TdFeed {
     if (!Array.isArray(data) || data.length === 0) return;
 
     const cData = []; // C Class data
+    const sData = []; // S Class updates
 
     for (let i = 0; i < data.length; i++) {
       // Process C Class messages
@@ -106,19 +148,27 @@ class TdFeed {
 
       // Process S Class messages
       else if (data[i].SF_MSG) {
-        this.parseSClassMessage(data[i].SF_MSG);
+        const res = this.parseSClassMessage(data[i].SF_MSG);
+        sData.push(...res);
       }
+      /*
       else if (data[i].SG_MSG) {
         this.parseSClassRefresh(data[i].SG_MSG);
       }
       else if (data[i].SH_MSG) {
         this.parseSClassRefresh(data[i].SH_MSG);
       }
+      */
     }
 
     // Save C Class data to the DB
     if (cData.length > 0) {
       insertCClassData(cData);
+    }
+
+    // Save S Class updates to the DB
+    if (sData.length > 0) {
+      insertSClassData(sData);
     }
   }
 }
