@@ -14,10 +14,18 @@ class Listener {
   constructor(client, topic) {
     this.client = client;
     this.topic = topic;
+
     // Latency meter
     this.histogram = io.histogram({
       name: `${this.topic}_latency`,
       measurement: 'mean'
+    });
+
+    // Message rate meter
+    this.meter = io.meter({
+      name: `${this.topic}_msg_min`,
+      samples: 1,
+      timeframe: 60
     });
   }
 
@@ -34,9 +42,10 @@ class Listener {
         return;
       }
 
+      // Update metrics
       const latency = calculateLatency(message.headers.timestamp);
-
       this.histogram.update(latency);
+      this.meter.mark();
 
       message.readString('utf8', (error, string) => {
         if (error) {
