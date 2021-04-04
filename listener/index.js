@@ -17,14 +17,16 @@ class Listener {
 
     // Latency meter
     this.histogram = io.histogram({
-      name: `${this.topic}_latency`,
+      name: `${this.topic} Latency`,
       measurement: 'mean'
     });
 
     // Message rate meter
     this.meter = io.meter({
-      name: `${this.topic}_msg_rate`,
-      type: 'meter'
+      name: `${this.topic} msg/min`,
+      type: 'meter',
+      samples: 60,
+      timeframe: 60
     });
   }
 
