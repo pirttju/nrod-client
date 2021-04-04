@@ -23,9 +23,8 @@ class Listener {
 
     // Message rate meter
     this.meter = io.meter({
-      name: `${this.topic}_msg_min`,
-      samples: 1,
-      timeframe: 60
+      name: `${this.topic}_msg_rate`,
+      type: 'meter'
     });
   }
 
