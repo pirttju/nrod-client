@@ -1,10 +1,12 @@
-const dotenv = require('dotenv').config();
+require('log-timestamp');
+require('dotenv').config();
 const stompit = require('stompit');
 const Listener = require('./listener');
 const TdFeed = require('./models/tdfeed');
+//const MovementFeed = require('./models/movement');
 
-// Configure connection management
-const servers = [{
+// Connection details
+const nrodServer = {
   'host': process.env.NROD_HOST,
   'port': process.env.NROD_PORT,
   'connectHeaders': {
@@ -14,7 +16,9 @@ const servers = [{
     'login': process.env.NROD_USER,
     'passcode': process.env.NROD_PASSWORD
   }
-}];
+};
+
+const servers = [nrodServer];
 
 const reconnectOptions = {
   'useExponentialBackOff': true,
@@ -24,41 +28,56 @@ const reconnectOptions = {
   'randomize': false
 };
 
-const connections = new stompit.ConnectFailover(servers, reconnectOptions);
+// Create connection manager
+const connectionManager = new stompit.ConnectFailover(servers, reconnectOptions);
+
+const channel = new stompit.Channel(connectionManager, {
+  alwaysConnected: true
+});
 
 // Log connection events
-connections.on('connecting', (connector) => {
+connectionManager.on('connecting', (connector) => {
   const address = connector.serverProperties.remoteAddress.transportPath;
 
   console.log(`Connecting to ${address}`);
 });
 
-connections.on('error', (error) => {
+connectionManager.on('connect', (connector) => {
+  const address = connector.serverProperties.remoteAddress.transportPath;
+  console.log(`Connection established to ${address}`);
+});
+
+connectionManager.on('error', (error) => {
   const connectArgs = error.connectArgs;
   const address = `${connectArgs.host}:${connectArgs.port}`;
 
   console.log(`Connection error to ${address}: ${error.message}`);
 });
 
-// Connect, subscribe to queues
-connections.connect((error, client, reconnect) => {
+const channelFactory = new stompit.ChannelFactory(connectionManager);
+
+channelFactory.channel((error, channel) => {
   if (error) {
-    console.log('Terminal error, gave up reconnecting');
+    console.log(`Channel factory error: ${error.message}`);
   }
 
+  /*
   // Movement Data
+  const movement = new MovementFeed;
   const mvtListener = new Listener(client, 'TRAIN_MVT_ALL_TOC');
   mvtListener.subscribe((data) => {
-    // TODO: handle data
+    movement.parse(data);
   });
+  */
 
   // Train Describer Data
   const td = new TdFeed();
-  const tdListener = new Listener(client, 'TD_ALL_SIG_AREA');
+  const tdListener = new Listener(channel, 'TD_ALL_SIG_AREA');
   tdListener.subscribe((data) => {
     td.parse(data);
   });
 
+  /*
   // Very Short Term Plan Schedules
   const vstpListener = new Listener(client, 'VSTP_ALL');
   vstpListener.subscribe((data) => {
@@ -70,4 +89,5 @@ connections.connect((error, client, reconnect) => {
   tsrListener.subscribe((data) => {
     // TODO: handle data
   });
+  */
 });

@@ -1,9 +1,9 @@
-const dotenv = require('dotenv').config();
+require('log-timestamp');
+require('dotenv').config();
 
-// Calculates message latency
 class Listener {
-  constructor(client, topic) {
-    this.client = client;
+  constructor(channel, topic) {
+    this.channel = channel;
     this.topic = topic;
   }
 
@@ -14,7 +14,7 @@ class Listener {
       'ack': 'client-individual'
     };
 
-    this.client.subscribe(headers, (error, message) => {
+    this.channel.subscribe(headers, (error, message) => {
       if (error) {
         console.log(`[${this.topic}] Subscribe error: ${error.message}`);
         return;
@@ -23,8 +23,7 @@ class Listener {
       message.readString('utf8', (error, string) => {
         if (error) {
           console.log(`[${this.topic}] Read message error: ${error.message}`);
-          // Send NACK
-          this.client.nack(message);
+          this.channel.nack(message);
           return;
         }
 
@@ -34,14 +33,11 @@ class Listener {
           data = JSON.parse(string);
         } catch(error) {
           console.log(`[${this.topic}] JSON parse error: ${error}`);
-          // Send NACK
-          this.client.nack(message);
+          this.channel.nack(message);
           return;
         }
 
-        // Send ACK
-        this.client.ack(message);
-
+        this.channel.ack(message);
         messageHandler(data);
       });
     })
