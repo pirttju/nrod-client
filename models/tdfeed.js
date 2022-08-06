@@ -30,7 +30,7 @@ function calculateLatency(dt) {
   const now = new Date();
   const d = (now-dt)/1000;
 
-  return d.toPrecision(3);
+  return d.toFixed(3);
 }
 
 class TdFeed {
