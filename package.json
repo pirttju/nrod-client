@@ -1,14 +1,15 @@
 {
   "name": "nrod-client",
-  "version": "1.0.0",
-  "description": "network rail open data client",
+  "version": "1.1.0",
+  "description": "Client software for use with Network Rail Open Data",
   "main": "nrod-client.js",
   "dependencies": {
     "@pm2/io": "^5.0.0",
     "bluebird": "^3.7.2",
-    "dotenv": "^8.2.0",
+    "dotenv": "^16.0.1",
+    "log-timestamp": "^0.3.0",
     "pg-monitor": "^1.4.1",
-    "pg-promise": "^10.9.5",
+    "pg-promise": "^10.11.1",
     "stompit": "^1.0.0"
   },
   "scripts": {
