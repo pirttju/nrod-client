@@ -28,9 +28,9 @@ function insertSClassData(data) {
 // Calculates message latency
 function calculateLatency(dt) {
   const now = new Date();
-  const d = (now-dt);
+  const d = (now-dt)/1000;
 
-  return d;
+  return d.toPrecision(3);
 }
 
 class TdFeed {
@@ -38,9 +38,8 @@ class TdFeed {
     this.bits = {}; // S Class bits
 
     // Latency meter
-    this.latency = io.histogram({
-      name: 'TD Feed Latency',
-      measurement: 'mean'
+    this.latency = io.metric({
+      name: 'TD Feed Latency (s)'
     });
   }
 
@@ -71,7 +70,7 @@ class TdFeed {
 
     // Update metrics
     const latency = calculateLatency(datetime);
-    this.latency.update(latency);
+    this.latency.set(latency);
 
     const out = {
       time: datetime,
@@ -88,10 +87,6 @@ class TdFeed {
   parseSClassMessage(data) {
     // Parse Date
     const datetime = new Date(parseInt(data.time));
-
-    // Update metrics
-    const latency = calculateLatency(datetime);
-    this.latency.update(latency);
 
     // Parse bits
     const out = [];
@@ -115,12 +110,8 @@ class TdFeed {
   }
 
   parseSClassRefresh(data) {
-    // Parse Date
-    const datetime = new Date(parseInt(data.time));
-
-    // Update metrics
-    const latency = calculateLatency(datetime);
-    this.latency.update(latency);
+    // TODO: handle
+    return;
   }
 
   parse(data) {
