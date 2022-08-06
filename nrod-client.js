@@ -55,6 +55,7 @@ const channelFactory = new stompit.ChannelFactory(connectionManager);
 channelFactory.channel((error, channel) => {
   if (error) {
     console.log(`Channel factory error: ${error.message}`);
+    return;
   }
 
   /*
