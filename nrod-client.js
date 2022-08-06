@@ -31,10 +31,6 @@ const reconnectOptions = {
 // Create connection manager
 const connectionManager = new stompit.ConnectFailover(servers, reconnectOptions);
 
-const channel = new stompit.Channel(connectionManager, {
-  alwaysConnected: true
-});
-
 // Log connection events
 connectionManager.on('connecting', (connector) => {
   const address = connector.serverProperties.remoteAddress.transportPath;
