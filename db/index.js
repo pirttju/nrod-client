@@ -1,8 +1,7 @@
-const promise = require('bluebird');
-const pgPromise = require('pg-promise');
-const monitor = require('pg-monitor');
-const dotenv = require('dotenv').config();
-const {TdC, TdS} = require('./repos');
+const pgPromise = require("pg-promise");
+const monitor = require("pg-monitor");
+const dotenv = require("dotenv").config();
+const { TdC, TdS } = require("./repos");
 
 const config = {
   host: process.env.POSTGRES_HOST,
@@ -17,7 +16,7 @@ const initOptions = {
   extend(obj, dc) {
     obj.tdc = new TdC(obj, pgp);
     obj.tds = new TdS(obj, pgp);
-  }
+  },
 };
 
 const pgp = pgPromise(initOptions);
@@ -26,10 +25,10 @@ const db = pgp(config);
 // Activate events monitor
 // -development: all events
 // -production: errors only
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   monitor.attach(initOptions);
 } else {
-  monitor.attach(initOptions, ['error']);
+  monitor.attach(initOptions, ["error"]);
 }
 
-module.exports = {db, pgp};
+module.exports = { db, pgp };
