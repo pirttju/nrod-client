@@ -1,7 +1,7 @@
 const pgPromise = require("pg-promise");
 const monitor = require("pg-monitor");
 const dotenv = require("dotenv").config();
-const { TdC, TdS } = require("./repos");
+const { Movement, TdC, TdS } = require("./repos");
 
 const config = {
   host: process.env.POSTGRES_HOST,
@@ -12,8 +12,8 @@ const config = {
 };
 
 const initOptions = {
-  promiseLib: promise,
-  extend(obj, dc) {
+  extend(obj) {
+    obj.mvt = new Movement(obj, pgp);
     obj.tdc = new TdC(obj, pgp);
     obj.tds = new TdS(obj, pgp);
   },

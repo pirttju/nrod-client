@@ -1,156 +1,94 @@
-const io = require('@pm2/io');
-const {db} = require('../db');
+const io = require("@pm2/io");
+const { db } = require("../db");
 
-function insertMovement(data) {
-  return db.tx('insert-movement', t => {
-    const queries = [];
-
-    if (data && data.length > 0) {
-      queries.push(t.mvt.insert(data));
+function parsets(ts) {
+  if (ts) {
+    let date;
+    try {
+      date = new Date(parseInt(ts));
+    } catch {
+      date = null;
     }
-
-    return t.batch(queries);
-  });
+    return date;
+  } else {
+    return null;
+  }
 }
 
 class MovementFeed {
-  // 0001 - Train Activation
-  message0001(data) {
-    const datetime = new Date(parseInt(data.time));
+  parse(dataset) {
+    if (!Array.isArray(dataset) || dataset.length === 0) return;
 
-    const out = {
-      time: datetime,
-      area_id: data.area_id,
-      msg_type: data.msg_type,
-      from_berth: data.from ? data.from : null,
-      to_berth: data.to ? data.to : null,
-      descr: data.descr
-    }
+    return db.tx("insert-movement", (t) => {
+      const queries = [];
+      let save = {};
 
-    return out;
-  }
-
-  // 0002 - Train Cancellation
-  message0002(data) {
-    const datetime = new Date(parseInt(data.time));
-
-    const out = {
-      time: datetime,
-      area_id: data.area_id,
-      msg_type: data.msg_type,
-      from_berth: data.from ? data.from : null,
-      to_berth: data.to ? data.to : null,
-      descr: data.descr
-    }
-
-    return out;
-  }
-
-  // 0003 - Train Movement
-  message0003(data) {
-    const datetime = new Date(parseInt(data.time));
-
-    const out = {
-      time: datetime
-    }
-
-    return out;
-  }
-
-  // 0004 - Train Movement
-  message0004(data) {
-    const datetime = new Date(parseInt(data.time));
-
-    const out = {
-      time: datetime
-    }
-
-    return out;
-  }
-
-  // 0005 - Train Reinstatement
-  message0005(data) {
-    const datetime = new Date(parseInt(data.time));
-
-    const out = {
-      time: datetime
-    }
-
-    return out;
-  }
-
-  // 0006 - Change of Origin
-  message0006(data) {
-    const datetime = new Date(parseInt(data.time));
-
-    const out = {
-      time: datetime
-    }
-
-    return out;
-  }
-
-  // 0007 - Change of Identity
-  message0007(data) {
-    const datetime = new Date(parseInt(data.time));
-
-    const out = {
-      time: datetime
-    }
-
-    return out;
-  }
-
-  // 0008 -  Change of Location
-  message0008(data) {
-    const datetime = new Date(parseInt(data.time));
-
-    const out = {
-      time: datetime
-    }
-
-    return out;
-  }
-
-  parse(data) {
-    if (!Array.isArray(data) || data.length === 0) return;
-
-    const messages = [];
-
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].header) {
-        switch (data[i].header.msg_type) {
-          case '0001':
-            messages.push(this.message0001(data[i]));
+      for (const data of dataset) {
+        switch (data.header.msg_type) {
+          case "0001":
+            save = data.body;
+            save.creation_timestamp = parsets(data.body.creation_timestamp);
+            save.origin_dep_timestamp = parsets(data.body.origin_dep_timestamp);
+            queries.push(t.mvt.insert_0001(save));
             break;
-          case '0002':
-            messages.push(this.message0002(data[i]));
+          case "0002":
+            save = data.body;
+            save.canx_timestamp = parsets(data.body.canx_timestamp);
+            save.dep_timestamp = parsets(data.body.dep_timestamp);
+            save.orig_loc_timestamp = parsets(data.body.orig_loc_timestamp);
+            save.original_data_source = data.header.original_data_source;
+            queries.push(t.mvt.insert_0002(save));
             break;
-          case '0003':
-            messages.push(this.message0003(data[i]));
+          case "0003":
+            save = data.body;
+            save.actual_timestamp = parsets(data.body.actual_timestamp);
+            save.planned_timestamp = parsets(data.body.planned_timestamp);
+            save.original_data_source = data.header.original_data_source;
+            queries.push(t.mvt.insert_0003(save));
             break;
-          case '0005':
-            messages.push(this.message0005(data[i]));
+          case "0005":
+            save = data.body;
+            save.reinstatement_timestamp = parsets(
+              data.body.reinstatement_timestamp
+            );
+            save.dep_timestamp = parsets(data.body.dep_timestamp);
+            save.original_loc_timestamp = parsets(
+              data.body.original_loc_timestamp
+            );
+            save.original_data_source = data.header.original_data_source;
+            queries.push(t.mvt.insert_0005(save));
             break;
-          case '0006':
-            messages.push(this.message0006(data[i]));
+          case "0006":
+            save = data.body;
+            save.coo_timestamp = parsets(data.body.coo_timestamp);
+            save.dep_timestamp = parsets(data.body.dep_timestamp);
+            save.original_loc_timestamp = parsets(
+              data.body.original_loc_timestamp
+            );
+            save.original_data_source = data.header.original_data_source;
+            queries.push(t.mvt.insert_0006(save));
             break;
-          case '0007':
-            messages.push(this.message0007(data[i]));
+          case "0007":
+            save = data.body;
+            save.event_timestamp = parsets(data.body.event_timestamp);
+            save.original_data_source = data.header.original_data_source;
+            queries.push(t.mvt.insert_0007(save));
             break;
-          case '0008':
-            messages.push(this.message0008(data[i]));
-            break;
-          default:
+          case "0008":
+            save = data.body;
+            save.event_timestamp = parsets(data.body.event_timestamp);
+            save.dep_timestamp = parsets(data.body.dep_timestamp);
+            save.original_loc_timestamp = parsets(
+              data.body.original_loc_timestamp
+            );
+            save.original_data_source = data.header.original_data_source;
+            queries.push(t.mvt.insert_0008(save));
             break;
         }
       }
-    }
 
-    // Save messages to DB
-    if (messages.length > 0) {
-      insertMovement(messages);
-    }
+      return t.batch(queries);
+    });
   }
 }
 
