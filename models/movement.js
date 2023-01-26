@@ -44,6 +44,10 @@ class MovementFeed {
             save.actual_timestamp = parsets(data.body.actual_timestamp);
             save.planned_timestamp = parsets(data.body.planned_timestamp);
             save.original_data_source = data.header.original_data_source;
+            save.timetable_variation =
+              data.body.variation_status === "EARLY"
+                ? -data.body.timetable_variation
+                : data.body.timetable_variation;
             queries.push(t.mvt.insert_0003(save));
             break;
           case "0005":
