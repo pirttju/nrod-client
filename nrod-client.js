@@ -5,7 +5,7 @@ const Listener = require("./listener");
 const TdFeed = require("./models/tdfeed");
 const MovementFeed = require("./models/movement");
 const VSTPFeed = require("./models/vstp");
-const { VSTP } = require("./db/repos");
+const TSRFeed = require("./models/tsr");
 
 // Connection details
 const nrodServer = {
@@ -84,11 +84,10 @@ channelFactory.channel((error, channel) => {
     vstp.parse(data);
   });
 
-  /*
   // Temporary Speed Restrictions
-  const tsrListener = new Listener(client, 'TSR_ALL_ROUTE');
+  const tsr = new TSRFeed();
+  const tsrListener = new Listener(channel, "TSR_ALL_ROUTE");
   tsrListener.subscribe((data) => {
-    // TODO: handle data
+    tsr.parse(data);
   });
-  */
 });

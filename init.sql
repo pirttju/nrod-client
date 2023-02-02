@@ -245,4 +245,51 @@ CREATE TABLE nrod_changes_en_route (
 
 CREATE INDEX ON nrod_changes_en_route (schedule_id);
 
+
+-- TSR Feed
+
+-- Headers of the TSR message
+CREATE TABLE nrod_tsr_batch_msg(
+    id                          integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    route_group                 text,
+    route_group_code            text,
+    publish_date                timestamptz,
+    publish_source              text,
+    route_group_coverage        text,
+    batch_publish_event         text,
+    won_start_date              timestamptz,
+    won_end_date                timestamptz
+);
+
+-- Temporary Speed Restrictions
+CREATE TABLE nrod_tsr(
+    tsr_batch_msg_id            int REFERENCES nrod_tsr_batch_msg(id) ON DELETE CASCADE,
+    tsrid                       int,
+    creation_date               timestamptz,
+    publish_date                timestamptz,
+    publish_event               text,
+    route_group                 text,
+    route_code                  text,
+    route_order                 smallint,
+    tsr_reference               text,
+    from_location               text,
+    to_location                 text,
+    line_name                   text,
+    subunit_type                text,
+    mileage_from                smallint,
+    subunit_from                smallint,
+    mileage_to                  smallint,
+    subunit_to                  smallint,
+    moving_mileage              boolean,
+    passenger_speed             smallint,
+    freight_speed               smallint,
+    valid_from_date             timestamptz,
+    valid_to_date               timestamptz,
+    reason                      text,
+    requestor                   text,
+    comments                    text,
+    direction                   text,
+    PRIMARY KEY (tsr_batch_msg_id, tsrid)
+);
+
 COMMIT;
