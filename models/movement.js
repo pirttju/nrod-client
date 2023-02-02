@@ -29,6 +29,9 @@ class MovementFeed {
             save = data.body;
             save.creation_timestamp = parsets(data.body.creation_timestamp);
             save.origin_dep_timestamp = parsets(data.body.origin_dep_timestamp);
+            // change O->P or P->O due to a known bug in the system
+            if (save.schedule_type === "O") save.schedule_type = "P";
+            else if (save.schedule_type === "P") save.schedule_type = "O";
             queries.push(t.mvt.insert_0001(save));
             break;
           case "0002":
