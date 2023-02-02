@@ -24,8 +24,7 @@ const servers = [nrodServer];
 
 const reconnectOptions = {
   useExponentialBackOff: true,
-  initialReconnectDelay: 1000,
-  maxReconnectDelay: 60000,
+  initialReconnectDelay: 15000,
   maxReconnects: 30,
   randomize: false,
 };
