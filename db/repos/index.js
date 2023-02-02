@@ -1,5 +1,6 @@
 module.exports = {
-  TdC: require('./tdc'),
-  TdS: require('./tds'),
-  Movement: require('./movement')
+  TdC: require("./tdc"),
+  TdS: require("./tds"),
+  Movement: require("./movement"),
+  VSTP: require("./vstp"),
 };

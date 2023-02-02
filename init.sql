@@ -140,4 +140,109 @@ CREATE TABLE trust_change_location(
 
 CREATE INDEX ON trust_change_location(train_id);
 
+
+-- SCHEDULE & VSTP Feed
+
+CREATE TABLE nrod_tiploc (
+    tiploc_code                 text PRIMARY KEY,
+    nalco                       int,
+    check_char                  text,
+    tps_description             text,
+    stanox                      int,
+    crs_code                    text,
+    description                 text
+);
+
+-- AA Records (Association)
+CREATE TABLE nrod_association (
+    id                          integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    main_train_uid              text,
+    assoc_train_uid             text,
+    assoc_start_date            date,
+    assoc_end_date              date,
+    assoc_days                  bit(7),
+    category                    text,
+    date_indicator              text,
+    location                    text,
+    base_location_suffix        smallint,
+    assoc_location_suffix       smallint,
+    association_type            text,
+    stp_indicator               text
+);
+
+-- BS and BX Records (Schedule)
+CREATE TABLE nrod_schedule (
+    id                          integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    is_vstp                     boolean NOT NULL DEFAULT FALSE,
+    train_uid                   text NOT NULL,
+    schedule_start_date         date NOT NULL,
+    schedule_end_date           date,
+    schedule_days_runs          bit(7),
+    train_status                text,
+    train_category              text,
+    signalling_id               text,
+    train_service_code          integer,
+    power_type                  text,
+    timing_load                 text,
+    speed                       smallint,
+    operating_characteristics   text,
+    train_class                 text,
+    sleepers                    text,
+    reservations                text,
+    catering_code               text,
+    service_branding            text,
+    stp_indicator               text NOT NULL,
+    uic_code                    text,
+    atoc_code                   text,
+    applicable_timetable        boolean,
+    timetable_acceptance_date   timestamptz
+);
+
+CREATE UNIQUE INDEX nrod_schedule_unique_idx ON nrod_schedule (train_uid, schedule_start_date, stp_indicator, is_vstp);
+
+-- LO, LI and LT Records (Location)
+CREATE TABLE nrod_schedule_location (
+    schedule_id                 integer REFERENCES nrod_schedule (id) ON DELETE CASCADE,
+    position                    smallint,
+    tiploc_code                 text NOT NULL,
+    tiploc_instance             smallint,
+    arrival_day                 smallint,
+    departure_day               smallint,
+    arrival                     time without time zone,
+    departure                   time without time zone,
+    public_arrival              time without time zone,
+    public_departure            time without time zone,
+    platform                    text,
+    line                        text,
+    path                        text,
+    activity                    text,
+    engineering_allowance       text,
+    pathing_allowance           text,
+    performance_allowance       text,
+    PRIMARY KEY (schedule_id, position)
+);
+
+-- CR Record (Changes En Route)
+CREATE TABLE nrod_changes_en_route (
+    schedule_id                 integer REFERENCES nrod_schedule (id) ON DELETE CASCADE,
+    tiploc_code                 text NOT NULL,
+    tiploc_instance             smallint,
+    train_status                text,
+    train_category              text,
+    signalling_id               text,
+    train_service_code          integer,
+    power_type                  text,
+    timing_load                 text,
+    speed                       smallint,
+    operating_characteristics   text,
+    train_class                 text,
+    sleepers                    text,
+    reservations                text,
+    catering_code               text,
+    service_branding            text,
+    uic_code                    text
+);
+
+CREATE INDEX ON nrod_changes_en_route (schedule_id);
+
 COMMIT;

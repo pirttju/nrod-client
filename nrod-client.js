@@ -4,6 +4,8 @@ const stompit = require("stompit");
 const Listener = require("./listener");
 const TdFeed = require("./models/tdfeed");
 const MovementFeed = require("./models/movement");
+const VSTPFeed = require("./models/vstp");
+const { VSTP } = require("./db/repos");
 
 // Connection details
 const nrodServer = {
@@ -75,13 +77,14 @@ channelFactory.channel((error, channel) => {
     td.parse(data);
   });
 
-  /*
   // Very Short Term Plan Schedules
-  const vstpListener = new Listener(client, 'VSTP_ALL');
+  const vstp = new VSTPFeed();
+  const vstpListener = new Listener(channel, "VSTP_ALL");
   vstpListener.subscribe((data) => {
-    // TODO: handle data
+    vstp.parse(data);
   });
 
+  /*
   // Temporary Speed Restrictions
   const tsrListener = new Listener(client, 'TSR_ALL_ROUTE');
   tsrListener.subscribe((data) => {
