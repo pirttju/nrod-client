@@ -81,16 +81,14 @@ class TSRFeed {
     });
 
     return db.tx("insert-tsr-batch-msg", async (t) => {
-      const id = await t.tsr.insert(tsr_batch_msg);
+      const res = await t.tsr.insert(tsr_batch_msg);
       console.log("TSR Batch", tsr_batch_msg.route_group, "inserted:", id);
-
       const queries = [];
       const tsrs = save.map((v) => ({
         ...v,
-        tsr_batch_msg_id: id,
+        tsr_batch_msg_id: res.id,
       }));
       queries.push(t.tsr.insert_tsr(tsrs));
-
       return t.batch(queries);
     });
   }
