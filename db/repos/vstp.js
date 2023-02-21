@@ -26,7 +26,7 @@ function createColumnsets(pgp) {
         { name: "uic_code", def: null },
         { name: "atoc_code", def: null },
         { name: "applicable_timetable", def: null },
-        { name: "timetable_acceptance_date" },
+        { name: "last_modified" },
       ],
       { table: { table: "nrod_schedule", schema: "public" } }
     );

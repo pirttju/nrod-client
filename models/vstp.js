@@ -126,7 +126,7 @@ class VSTPFeed {
         atoc_code: parsevalue(v.atoc_code),
         applicable_timetable:
           data.VSTPCIFMsgV1.schedule.applicable_timetable === "Y",
-        timetable_acceptance_date: parsets(data.VSTPCIFMsgV1.timestamp),
+        last_modified: parsets(data.VSTPCIFMsgV1.timestamp),
         locations: [],
       };
 

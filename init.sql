@@ -170,6 +170,8 @@ CREATE TABLE nrod_association (
     stp_indicator               text
 );
 
+CREATE UNIQUE INDEX nrod_association_unique_idx ON nrod_association (main_train_uid, assoc_start_date, stp_indicator);
+
 -- BS and BX Records (Schedule)
 CREATE TABLE nrod_schedule (
     id                          integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -195,7 +197,7 @@ CREATE TABLE nrod_schedule (
     uic_code                    text,
     atoc_code                   text,
     applicable_timetable        boolean,
-    timetable_acceptance_date   timestamptz
+    last_modified               timestamptz
 );
 
 CREATE UNIQUE INDEX nrod_schedule_unique_idx ON nrod_schedule (train_uid, schedule_start_date, stp_indicator, is_vstp);
