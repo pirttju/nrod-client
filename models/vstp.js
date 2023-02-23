@@ -34,7 +34,7 @@ function parsets(ts) {
 }
 
 function parsespeed(CIF_speed) {
-  const speed = parseInt(CIF_speed) || 0;
+  const speed = +CIF_speed;
   switch (speed) {
     case 22:
       return 10;
