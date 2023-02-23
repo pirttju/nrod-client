@@ -34,7 +34,12 @@ function parsets(ts) {
 }
 
 function parsespeed(CIF_speed) {
-  const speed = +CIF_speed;
+  // set null if attribute is missing
+  if (CIF_speed === undefined) {
+    return null;
+  }
+  let speed = parseInt(CIF_speed) || 0;
+  // fix speed values in incorrect unit
   switch (speed) {
     case 22:
       return 10;
