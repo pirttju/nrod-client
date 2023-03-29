@@ -82,7 +82,6 @@ class TSRFeed {
 
     return db.tx("insert-tsr-batch-msg", async (t) => {
       const res = await t.tsr.insert(tsr_batch_msg);
-      console.log("TSR Batch", tsr_batch_msg.route_group, "inserted:", id);
       const queries = [];
       const tsrs = save.map((v) => ({
         ...v,
