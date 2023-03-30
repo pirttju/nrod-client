@@ -1,4 +1,3 @@
-const io = require('@pm2/io');
 const {db} = require('../db');
 
 function insertCClassData(data) {
@@ -25,22 +24,9 @@ function insertSClassData(data) {
   });
 }
 
-// Calculates message latency
-function calculateLatency(dt) {
-  const now = new Date();
-  const d = (now-dt)/1000;
-
-  return d.toFixed(3);
-}
-
 class TdFeed {
   constructor() {
     this.bits = {}; // S Class bits
-
-    // Latency meter
-    this.latency = io.metric({
-      name: 'TD Feed Latency (s)'
-    });
   }
 
   setBit(areaId, bit, data) {
@@ -67,10 +53,6 @@ class TdFeed {
   parseCClassMessage(data) {
     // Parse Date
     const datetime = new Date(parseInt(data.time));
-
-    // Update metrics
-    const latency = calculateLatency(datetime);
-    this.latency.set(latency);
 
     const out = {
       time: datetime,
