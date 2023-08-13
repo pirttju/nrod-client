@@ -1,7 +1,7 @@
-const {db} = require('../db');
+const { db } = require("../db");
 
 function insertCClassData(data) {
-  return db.tx('insert-td-c-class', t => {
+  return db.tx("insert-td-c-class", (t) => {
     const queries = [];
 
     if (data && data.length > 0) {
@@ -13,7 +13,7 @@ function insertCClassData(data) {
 }
 
 function insertSClassData(data) {
-  return db.tx('insert-td-s-class', t => {
+  return db.tx("insert-td-s-class", (t) => {
     const queries = [];
 
     if (data && data.length > 0) {
@@ -39,7 +39,7 @@ class TdFeed {
       this.bits[`${areaId}:${bit}`] = data;
       return null; // did not exist
     }
-    return false // not modified
+    return false; // not modified
   }
 
   getBit(areaId, bit) {
@@ -60,8 +60,8 @@ class TdFeed {
       msg_type: data.msg_type,
       from_berth: data.from ? data.from : null,
       to_berth: data.to ? data.to : null,
-      descr: data.descr
-    }
+      descr: data.descr,
+    };
 
     return out;
   }
@@ -78,12 +78,12 @@ class TdFeed {
 
     for (let b = 0; b < 8; b++) {
       bit = addr * 8 + b;
-      if (this.setBit(data.area_id, bit, ((values & (1 << b)) > 0))) {
+      if (this.setBit(data.area_id, bit, (values & (1 << b)) > 0)) {
         out.push({
           time: datetime,
           area_id: data.area_id,
           bit: bit,
-          state: ((values & (1 << b)) > 0)
+          state: (values & (1 << b)) > 0,
         });
       }
     }
@@ -106,11 +106,9 @@ class TdFeed {
       // Process C Class messages
       if (data[i].CA_MSG) {
         cData.push(this.parseCClassMessage(data[i].CA_MSG));
-      }
-      else if (data[i].CB_MSG) {
+      } else if (data[i].CB_MSG) {
         cData.push(this.parseCClassMessage(data[i].CB_MSG));
-      }
-      else if (data[i].CC_MSG) {
+      } else if (data[i].CC_MSG) {
         cData.push(this.parseCClassMessage(data[i].CC_MSG));
       }
       /*
