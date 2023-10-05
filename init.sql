@@ -201,6 +201,10 @@ CREATE TABLE nrod_schedule (
 );
 
 CREATE UNIQUE INDEX nrod_schedule_unique_idx ON nrod_schedule (train_uid, schedule_start_date, stp_indicator, is_vstp);
+CREATE INDEX ON nrod_schedule USING BRIN (schedule_start_date);
+CREATE INDEX ON nrod_schedule (stp_indicator);
+CREATE INDEX ON nrod_schedule (train_uid);
+CREATE INDEX ON nrod_schedule (is_vstp);
 
 -- LO, LI and LT Records (Location)
 CREATE TABLE nrod_schedule_location (
@@ -223,6 +227,8 @@ CREATE TABLE nrod_schedule_location (
     performance_allowance       text,
     PRIMARY KEY (schedule_id, position)
 );
+
+CREATE INDEX ON nrod_schedule_location (tiploc_code);
 
 -- CR Record (Changes En Route)
 CREATE TABLE nrod_changes_en_route (
