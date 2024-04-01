@@ -139,7 +139,7 @@ CREATE INDEX ON nrod.change_location(train_id);
 
 -- TSR Feed
 -- Headers of the TSR message
-CREATE TABLE nrod.tsr_batch_msg(
+CREATE TABLE IF NOT EXISTS nrod.tsr_batch_msg(
     id                          integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     route_group                 text,
     route_group_code            text,
@@ -152,8 +152,8 @@ CREATE TABLE nrod.tsr_batch_msg(
 );
 
 -- Temporary Speed Restrictions
-CREATE TABLE nrod.tsr(
-    tsr_batch_msg_id            int REFERENCES nrod_tsr_batch_msg(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS nrod.tsr(
+    tsr_batch_msg_id            int REFERENCES nrod.tsr_batch_msg(id) ON DELETE CASCADE,
     tsrid                       int,
     creation_date               timestamptz,
     publish_date                timestamptz,
