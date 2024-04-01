@@ -3,11 +3,11 @@ const cs = {};
 function createColumnsets(pgp) {
   if (!cs.insert) {
     cs.insert = new pgp.helpers.ColumnSet([
-      'time',
-      'area_id',
-      'bit',
-      'state'
-    ], {table: {table: 'nrod_td_s', schema: 'public'}});
+      "time",
+      "area_id",
+      "bit",
+      "state"
+    ], {table: {table: "td_s", schema: "nrod"}});
   }
 }
 
