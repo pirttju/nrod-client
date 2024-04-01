@@ -13,7 +13,7 @@ function createColumnsets(pgp) {
         "won_start_date",
         "won_end_date",
       ],
-      { table: { table: "nrod_tsr_batch_msg", schema: "public" } }
+      { table: { table: "tsr_batch_msg", schema: "nrod" } }
     );
   }
   if (!cs.nrod_tsr) {
@@ -46,7 +46,7 @@ function createColumnsets(pgp) {
         "comments",
         "direction",
       ],
-      { table: { table: "nrod_tsr", schema: "public" } }
+      { table: { table: "tsr", schema: "nrod" } }
     );
   }
 }
