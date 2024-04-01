@@ -9,7 +9,7 @@ function createColumnsets(pgp) {
       'from_berth',
       'to_berth',
       'descr'
-    ], {table: {table: 'nrod_td_c', schema: 'public'}});
+    ], {table: {table: 'td_c', schema: 'nrod'}});
   }
 }
 
