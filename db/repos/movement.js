@@ -19,7 +19,7 @@ function createColumnsets(pgp) {
         { name: "schedule_end_date", def: null },
         { name: "schedule_type", def: null },
       ],
-      { table: { table: "trust_activation", schema: "public" } }
+      { table: { table: "activation", schema: "nrod" } }
     );
   }
   if (!cs.insert_0002) {
@@ -35,7 +35,7 @@ function createColumnsets(pgp) {
         { name: "orig_loc_timestamp", def: null },
         { name: "original_data_source", def: null },
       ],
-      { table: { table: "trust_cancellation", schema: "public" } }
+      { table: { table: "cancellation", schema: "nrod" } }
     );
   }
   if (!cs.insert_0003) {
@@ -52,7 +52,7 @@ function createColumnsets(pgp) {
         { name: "offroute_ind", def: null },
         { name: "original_data_source", def: null },
       ],
-      { table: { table: "trust_movement", schema: "public" } }
+      { table: { table: "movement", schema: "nrod" } }
     );
   }
   if (!cs.insert_0005) {
@@ -67,7 +67,7 @@ function createColumnsets(pgp) {
         { name: "original_loc_timestamp", def: null },
         { name: "original_data_source", def: null },
       ],
-      { table: { table: "trust_reinstatement", schema: "public" } }
+      { table: { table: "reinstatement", schema: "nrod" } }
     );
   }
   if (!cs.insert_0006) {
@@ -83,7 +83,7 @@ function createColumnsets(pgp) {
         { name: "original_loc_timestamp", def: null },
         { name: "original_data_source", def: null },
       ],
-      { table: { table: "trust_change_origin", schema: "public" } }
+      { table: { table: "change_origin", schema: "nrod" } }
     );
   }
   if (!cs.insert_0007) {
@@ -95,7 +95,7 @@ function createColumnsets(pgp) {
         { name: "event_timestamp" },
         { name: "original_data_source", def: null },
       ],
-      { table: { table: "trust_change_identity", schema: "public" } }
+      { table: { table: "change_identity", schema: "nrod" } }
     );
   }
   if (!cs.insert_0008) {
@@ -110,7 +110,7 @@ function createColumnsets(pgp) {
         { name: "original_loc_timestamp", def: null },
         { name: "original_data_source", def: null },
       ],
-      { table: { table: "trust_change_location", schema: "public" } }
+      { table: { table: "change_location", schema: "nrod" } }
     );
   }
 }
