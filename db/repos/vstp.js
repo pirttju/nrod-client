@@ -28,7 +28,7 @@ function createColumnsets(pgp) {
         { name: "applicable_timetable", def: null },
         { name: "last_modified" },
       ],
-      { table: { table: "nrod_schedule", schema: "public" } }
+      { table: { table: "schedule", schema: "nrod" } }
     );
   }
   if (!cs.nrod_schedule_location) {
@@ -52,7 +52,7 @@ function createColumnsets(pgp) {
         { name: "pathing_allowance", def: null },
         { name: "performance_allowance", def: null },
       ],
-      { table: { table: "nrod_schedule_location", schema: "public" } }
+      { table: { table: "schedule_location", schema: "nrod" } }
     );
   }
 }
@@ -66,7 +66,7 @@ class VSTPRepository {
 
   async delete(data) {
     const query =
-      "DELETE FROM nrod_schedule " +
+      "DELETE FROM nrod.schedule " +
       "WHERE is_vstp AND train_uid = $1 AND schedule_start_date = $2 AND stp_indicator = $3";
     return this.db.result(
       query,
