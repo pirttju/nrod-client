@@ -65,7 +65,9 @@ class TSRRepository {
   }
 
   async insert_tsr(data) {
-    const query = this.pgp.helpers.insert(data, cs.nrod_tsr);
+    const query = this.pgp.helpers.insert(data, cs.nrod_tsr) +
+      " on conflict (tsr_batch_msg_id, tsrid) do update set " +
+      cs.nrod_tsr.assignColumns({from: 'excluded', skip: ["tsr_batch_msg_id", "tsrid"]});
     return this.db.none(query);
   }
 }
