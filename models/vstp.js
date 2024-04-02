@@ -196,9 +196,9 @@ class VSTPFeed {
         case "Create":
           // delete old (if any)
           const oldrows = await t.vstp.delete(train);
-          if (oldrows > 0) {
+          /*if (oldrows > 0) {
             console.log("VSTP Deleted", oldrows, "row(s)");
-          }
+          }*/
           // insert new
           const ids = await t.vstp.insert(save);
           const queries = [];
@@ -209,26 +209,26 @@ class VSTPFeed {
             }));
             queries.push(t.vstp.insert_locations(save_locations));
           });
-          console.log(
+          /*console.log(
             "VSTP",
             data.VSTPCIFMsgV1.schedule.transaction_type,
             train.train_uid,
             train.schedule_start_date,
             train.stp_indicator,
             ids
-          );
+          );*/
           return t.batch(queries);
         // delete
         case "Delete":
           const delrows = await t.vstp.delete(train);
-          console.log(
+          /*console.log(
             "VSTP",
             data.VSTPCIFMsgV1.schedule.transaction_type,
             train.train_uid,
             train.schedule_start_date,
             train.stp_indicator,
             delrows
-          );
+          );*/
           return;
         default:
           console.log(
