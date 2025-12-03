@@ -48,6 +48,7 @@ class TSRFeed {
     };
 
     const save = [];
+    const ids = new Set();
 
     data.TSRBatchMsgV1.TSRBatchMsg.tsr.forEach((v) => {
       const tsr = {
@@ -77,7 +78,12 @@ class TSRFeed {
         comments: parsevalue(v.Comments),
         direction: parsevalue(v.Direction),
       };
-      save.push(tsr);
+
+      // Ensure we add only unique TSRIDs
+      if (!ids.has(tsr.tsrid)) {
+        ids.add(tsr.tsrid);
+        save.push(tsr);
+      }
     });
 
     return db.tx("insert-tsr-batch-msg", async (t) => {
